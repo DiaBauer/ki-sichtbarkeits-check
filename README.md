@@ -30,8 +30,9 @@ Die Prüfmethode basiert auf [geo-seo-claude](https://github.com/zubair-trabzada
 1. Repository in Vercel importieren (Framework: Next.js; Region fra1 steht in vercel.json).
 2. Umgebungsvariablen setzen:
    - `GATE_SECRET`: beliebige lange Zufallszeichenkette (Pflicht)
-   - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`: für die Lead-Speicherung (optional;
-     ohne sie landen Leads im Vercel-Log als `{"evt":"lead",...}`)
+   - Leads: gehen per Funktion `geo_lead_einfuegen` in die Tabelle `geo_leads` im
+     Supabase-Projekt kampagnen-cockpit (öffentlicher Schlüssel genügt, siehe `lib/leads.ts`).
+     Bei einem Fehler landen sie im Vercel-Log als `{"evt":"lead",...}`.
 3. KI: `ANTHROPIC_API_KEY` setzen (direkte Abrechnung bei Anthropic, Modell
    claude-sonnet-5-5). Ohne Key wird das Vercel AI Gateway verwendet.
 4. Domains verbinden, z. B. `check.agenticweb.studio` und `check.marketing-studio.ai`.

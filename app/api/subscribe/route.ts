@@ -20,7 +20,6 @@ export async function POST(req: Request) {
     newsletter: true,
     source: (body.source || "newsletter").slice(0, 40),
     site: (body.site || "").slice(0, 40),
-    consent_at: new Date().toISOString(),
   });
   return Response.json({ ok: true });
 }

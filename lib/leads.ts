@@ -1,21 +1,40 @@
-// Lead storage: Supabase table geo_leads when configured, otherwise the
-// runtime log (so no lead is lost before the database is set up).
-export async function storeLead(lead: Record<string, unknown>) {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) {
-    // No database configured yet: keep the lead in the runtime log so it is not lost.
-    console.log(JSON.stringify({ evt: "lead", ...lead }));
-    return;
-  }
-  const res = await fetch(`${url}/rest/v1/geo_leads`, {
-    method: "POST",
-    headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json", Prefer: "return=minimal" },
-    body: JSON.stringify(lead),
-  });
-  if (!res.ok) {
-    console.error("lead insert failed", res.status, await res.text());
+// Lead storage in Supabase (project "kampagnen-cockpit", table geo_leads).
+// Writes go through the SECURITY DEFINER function geo_lead_einfuegen, which can
+// only insert. That is why the public (publishable) key is enough here; no
+// secret key is needed. If the insert fails, the lead is kept in the runtime log.
+const SUPABASE_URL = process.env.SUPABASE_URL || "https://fsvrvvcnzvoroitnovih.supabase.co";
+const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || "sb_publishable_Udd4FR1cuF3mjuZc1Tzwhw_LZszWolg";
+
+export type Lead = {
+  email: string;
+  name?: string | null;
+  checked_url?: string | null;
+  brand_detected?: string | null;
+  score?: number | null;
+  site?: string | null;
+  source?: string | null;
+  newsletter?: boolean;
+};
+
+export async function storeLead(lead: Lead) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/geo_lead_einfuegen`, {
+      method: "POST",
+      headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        p_email: lead.email,
+        p_name: lead.name ?? null,
+        p_checked_url: lead.checked_url ?? null,
+        p_brand_detected: lead.brand_detected ?? null,
+        p_score: lead.score ?? null,
+        p_site: lead.site ?? null,
+        p_source: lead.source ?? null,
+        p_newsletter: !!lead.newsletter,
+      }),
+    });
+    if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+  } catch (e) {
+    console.error("lead insert failed", e);
     console.log(JSON.stringify({ evt: "lead", ...lead }));
   }
 }
-

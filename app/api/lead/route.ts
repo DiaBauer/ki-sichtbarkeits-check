@@ -40,7 +40,6 @@ export async function POST(req: Request) {
     brand_detected: data.brand,
     score: typeof body.score === "number" ? body.score : null,
     site: (body.site || "").slice(0, 40),
-    consent_at: new Date().toISOString(),
     newsletter: !!body.newsletter,
     source: "report",
   });
