@@ -5,6 +5,32 @@ import type { Brand } from "@/lib/brand";
 import { CATEGORY_META, CategoryKey, Finding, Status } from "@/lib/categories";
 import { grade, tone, totalScore } from "@/lib/score";
 import Seal from "./Seal";
+import type { Tone } from "@/lib/score";
+import {
+  AlertTriangle, BadgeCheck, Bot, CalendarCheck, Check, CheckCircle2, Code2, Copy, FileSearch, Hash, ListChecks,
+  Loader2, Lock, MessageCircleQuestion, Quote, ScanSearch, ShieldCheck, Users, Wrench, XCircle, type LucideIcon,
+} from "lucide-react";
+
+const CAT_ICON: Record<CategoryKey, LucideIcon> = {
+  citability: Quote,
+  brand: BadgeCheck,
+  content: ShieldCheck,
+  technical: Bot,
+  schema: Code2,
+  answer: MessageCircleQuestion,
+};
+const STATUS_ICON: Record<Status, LucideIcon> = { ok: CheckCircle2, warn: AlertTriangle, fail: XCircle };
+
+function H3({ icon: Icon, children }: { icon: LucideIcon; children: React.ReactNode }) {
+  return (
+    <h3 className="h3">
+      <span className="h3-icon" aria-hidden="true">
+        <Icon size={18} strokeWidth={2} />
+      </span>
+      {children}
+    </h3>
+  );
+}
 
 type Scan = {
   url: string;
@@ -104,13 +130,14 @@ export default function Checker({ brand, initialUrl }: { brand: Brand; initialUr
   const complete = !!insights;
   const total = complete ? totalScore(scores) : null;
   const g = total !== null ? grade(total) : null;
-  const segments: Partial<Record<CategoryKey, Status>> = Object.fromEntries(
+  const segments: Partial<Record<CategoryKey, Tone>> = Object.fromEntries(
     Object.entries(scores).map(([k, v]) => [k, tone(v as number)]),
   );
   const busy = phase === "scanning" || phase === "analyzing";
 
   return (
     <main>
+      <div className="hero-band">
       <section className="hero wrap">
         <h1>Versteht KI, was Ihr Unternehmen anbietet?</h1>
         <p className="lede">
@@ -131,13 +158,19 @@ export default function Checker({ brand, initialUrl }: { brand: Brand; initialUr
             disabled={busy}
             required
           />
-          <button type="submit" disabled={busy}>
+          <button type="submit" className="btn-primary" disabled={busy}>
+            {busy ? <Loader2 size={20} className="spin" aria-hidden="true" /> : <ScanSearch size={20} aria-hidden="true" />}
             {busy ? "Prüfung läuft" : "Website prüfen"}
           </button>
         </form>
-        <p className="hint">Kostenlos, ohne Anmeldung. Die Prüfung dauert etwa eine Minute.</p>
+        <ul className="assurances">
+          <li><Check size={16} aria-hidden="true" /> Kostenlos</li>
+          <li><Check size={16} aria-hidden="true" /> Ohne Anmeldung</li>
+          <li><Check size={16} aria-hidden="true" /> Ergebnis in etwa einer Minute</li>
+        </ul>
         {error && phase === "error" && <p className="error" role="alert">{error}</p>}
       </section>
+      </div>
 
       {phase === "scanning" && (
         <section className="wrap progress" aria-live="polite">
@@ -186,7 +219,7 @@ export default function Checker({ brand, initialUrl }: { brand: Brand; initialUr
           </div>
 
           <section className="block">
-            <h3>Bewertung nach Prüfbereichen</h3>
+            <H3 icon={ListChecks}>Bewertung nach Prüfbereichen</H3>
             <table className="cats">
               <thead>
                 <tr>
@@ -202,7 +235,13 @@ export default function Checker({ brand, initialUrl }: { brand: Brand; initialUr
                   return (
                     <tr key={k}>
                       <th scope="row">
-                        <span className="cat-name">{CATEGORY_META[k].label}</span>
+                        <span className="cat-name">
+                          {(() => {
+                            const Icon = CAT_ICON[k];
+                            return <Icon size={17} className="cat-icon" aria-hidden="true" />;
+                          })()}
+                          {CATEGORY_META[k].label}
+                        </span>
                         <span className="cat-explain">
                           {k === "content" && insights ? insights.inhaltBegruendung : k === "answer" && insights ? insights.antwortBegruendung : CATEGORY_META[k].explain}
                         </span>
@@ -222,11 +261,13 @@ export default function Checker({ brand, initialUrl }: { brand: Brand; initialUr
           </section>
 
           <section className="block">
-            <h3>Einzelbefunde</h3>
+            <H3 icon={FileSearch}>Einzelbefunde</H3>
             <ul className="findings">
-              {scan.findings.map((f) => (
+              {scan.findings.map((f) => {
+                const Icon = STATUS_ICON[f.status];
+                return (
                 <li key={f.id} className={f.status}>
-                  <span className="mark" aria-hidden="true" />
+                  <Icon size={20} className="mark" aria-hidden="true" />
                   <div>
                     <p className="f-label">
                       {f.label} <span className="sr-only">({STATUS_WORD[f.status]})</span>
@@ -234,13 +275,14 @@ export default function Checker({ brand, initialUrl }: { brand: Brand; initialUr
                     <p className="f-detail">{f.detail}</p>
                   </div>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           </section>
 
           {insights && (
             <section className="block">
-              <h3>Die drei wichtigsten Maßnahmen</h3>
+              <H3 icon={Wrench}>Die drei wichtigsten Maßnahmen</H3>
               <Measures items={insights.massnahmen} />
             </section>
           )}
@@ -255,7 +297,8 @@ export default function Checker({ brand, initialUrl }: { brand: Brand; initialUr
             <section className="cta">
               <h3>{brand.ctaHeadline}</h3>
               <p>{brand.ctaText}</p>
-              <a className="button" href={brand.ctaUrl}>
+              <a className="btn-primary" href={brand.ctaUrl}>
+                <CalendarCheck size={20} aria-hidden="true" />
                 {brand.ctaLabel}
               </a>
             </section>
@@ -268,14 +311,17 @@ export default function Checker({ brand, initialUrl }: { brand: Brand; initialUr
           <h2>Was geprüft wird</h2>
           <dl>
             <div>
+              <span className="explain-icon" aria-hidden="true"><Bot size={22} /></span>
               <dt>Ob KI Ihre Seite lesen darf und kann</dt>
               <dd>Sperren in der robots.txt, Seiten, die nur mit JavaScript funktionieren, fehlende Sitemap oder llms.txt.</dd>
             </div>
             <div>
+              <span className="explain-icon" aria-hidden="true"><BadgeCheck size={22} /></span>
               <dt>Ob KI versteht, wer Sie sind</dt>
               <dd>Strukturierte Daten zu Ihrem Unternehmen, verknüpfte Profile, Einträge auf Wikipedia und Bewertungsportalen.</dd>
             </div>
             <div>
+              <span className="explain-icon" aria-hidden="true"><Quote size={22} /></span>
               <dt>Ob Ihre Texte zitierfähig sind</dt>
               <dd>Klare Antworten auf Kundenfragen, belegte Aussagen, Zahlen, erkennbare Expertise.</dd>
             </div>
@@ -342,14 +388,17 @@ function LeadGate({
 
   return (
     <section className="gate">
-      <h3>Vollständigen Bericht freischalten</h3>
+      <div className="gate-head">
+        <span className="gate-lock" aria-hidden="true"><Lock size={22} /></span>
+        <h3>Vollständigen Bericht freischalten</h3>
+      </div>
       <p>Der vollständige Bericht enthält zusätzlich:</p>
       <ul className="gate-list">
-        <li>die drei Zielgruppen, die nach Ihrem Angebot suchen, mit geschätztem Anteil</li>
-        <li>{counts.fragen} Fragen, die Ihre Kunden einer KI stellen, bevor sie einen Anbieter kennen</li>
-        <li>{counts.keywords} Suchbegriffe, für die Sie als Quelle auftauchen sollten</li>
-        <li>alle {counts.massnahmen} Maßnahmen, nach Wirkung sortiert</li>
-        <li>fertige strukturierte Daten (JSON-LD) zum Einfügen in Ihre Website</li>
+        <li><Check size={18} aria-hidden="true" />die drei Zielgruppen, die nach Ihrem Angebot suchen, mit geschätztem Anteil</li>
+        <li><Check size={18} aria-hidden="true" />{counts.fragen} Fragen, die Ihre Kunden einer KI stellen, bevor sie einen Anbieter kennen</li>
+        <li><Check size={18} aria-hidden="true" />{counts.keywords} Suchbegriffe, für die Sie als Quelle auftauchen sollten</li>
+        <li><Check size={18} aria-hidden="true" />alle {counts.massnahmen} Maßnahmen, nach Wirkung sortiert</li>
+        <li><Check size={18} aria-hidden="true" />fertige strukturierte Daten (JSON-LD) zum Einfügen in Ihre Website</li>
       </ul>
       <form className="gate-form" onSubmit={submit}>
         <div className="field">
@@ -368,7 +417,8 @@ function LeadGate({
           </span>
         </label>
         {err && <p className="error" role="alert">{err}</p>}
-        <button type="submit" disabled={sending}>
+        <button type="submit" className="btn-primary" disabled={sending}>
+          {sending ? <Loader2 size={18} className="spin" aria-hidden="true" /> : <Lock size={18} aria-hidden="true" />}
           {sending ? "Wird freigeschaltet" : "Bericht freischalten"}
         </button>
       </form>
@@ -382,7 +432,7 @@ function Full({ gated }: { gated: Gated }) {
   return (
     <>
       <section className="block">
-        <h3>Wer nach Ihrem Angebot sucht</h3>
+        <H3 icon={Users}>Wer nach Ihrem Angebot sucht</H3>
         <ul className="audiences">
           {gated.zielgruppen.map((z) => (
             <li key={z.name}>
@@ -400,7 +450,7 @@ function Full({ gated }: { gated: Gated }) {
       </section>
 
       <section className="block">
-        <h3>Fragen, die Ihre Kunden einer KI stellen</h3>
+        <H3 icon={MessageCircleQuestion}>Fragen, die Ihre Kunden einer KI stellen</H3>
         <p className="block-intro">
           Für diese Fragen sollte Ihre Website eine klare, zitierfähige Antwort liefern. Sortiert danach, wie weit der Kunde in
           seiner Entscheidung ist.
@@ -413,7 +463,10 @@ function Full({ gated }: { gated: Gated }) {
               <h4>{PHASE_LABEL[ph]}</h4>
               <ul className="questions">
                 {list.map((f) => (
-                  <li key={f.frage}>{f.frage}</li>
+                  <li key={f.frage}>
+                    <MessageCircleQuestion size={18} aria-hidden="true" />
+                    <span>{f.frage}</span>
+                  </li>
                 ))}
               </ul>
             </div>
@@ -422,10 +475,10 @@ function Full({ gated }: { gated: Gated }) {
       </section>
 
       <section className="block">
-        <h3>Suchbegriffe</h3>
+        <H3 icon={Hash}>Suchbegriffe</H3>
         <p className="keywords">
           {gated.keywords.map((k) => (
-            <span key={k.begriff} style={{ fontSize: `${0.95 + (k.relevanz / maxRel) * 0.55}rem` }}>
+            <span key={k.begriff} style={{ fontSize: `${0.9 + (k.relevanz / maxRel) * 0.25}rem` }}>
               {k.begriff}
             </span>
           ))}
@@ -434,13 +487,13 @@ function Full({ gated }: { gated: Gated }) {
 
       {gated.massnahmen.length > 3 && (
         <section className="block">
-          <h3>Weitere Maßnahmen</h3>
+          <H3 icon={Wrench}>Weitere Maßnahmen</H3>
           <Measures items={gated.massnahmen.slice(3)} start={4} />
         </section>
       )}
 
       <section className="block">
-        <h3>Strukturierte Daten zum Einfügen</h3>
+        <H3 icon={Code2}>Strukturierte Daten zum Einfügen</H3>
         <p className="block-intro">
           Fügen Sie diesen Code in den Kopfbereich Ihrer Startseite ein, eingebettet in{" "}
           <code>&lt;script type=&quot;application/ld+json&quot;&gt;</code>. Ersetzen Sie die Werte in eckigen Klammern.
@@ -455,6 +508,7 @@ function Full({ gated }: { gated: Gated }) {
               });
             }}
           >
+            {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
             {copied ? "Kopiert" : "Code kopieren"}
           </button>
           <pre>{gated.schemaVorschlag}</pre>

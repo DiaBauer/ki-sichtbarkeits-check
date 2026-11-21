@@ -23,6 +23,8 @@ export function grade(score: number) {
   return { note: 6, label: "ungenügend" };
 }
 
-export function tone(score: number): "ok" | "warn" | "fail" {
-  return score >= 70 ? "ok" : score >= 45 ? "warn" : "fail";
+// Four-step traffic light: green, yellow, orange, red
+export type Tone = "ok" | "mid" | "warn" | "fail";
+export function tone(score: number): Tone {
+  return score >= 70 ? "ok" : score >= 55 ? "mid" : score >= 40 ? "warn" : "fail";
 }

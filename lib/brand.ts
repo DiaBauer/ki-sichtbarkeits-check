@@ -15,8 +15,8 @@ export const BRANDS: Record<Brand["id"], Brand> = {
   agenticweb: {
     id: "agenticweb",
     name: "agenticweb.studio",
-    accent: "#2440C8",
-    accentInk: "#ffffff",
+    accent: "#17bfcf",
+    accentInk: "#0f1726",
     ctaHeadline: "Sie möchten, dass KI Sie empfiehlt?",
     ctaText:
       "Wir setzen die Maßnahmen aus diesem Prüfbericht für Sie um: strukturierte Daten, Antwortseiten, llms.txt und eine Website, die KI-Systeme verstehen.",
@@ -28,8 +28,8 @@ export const BRANDS: Record<Brand["id"], Brand> = {
   marketingstudio: {
     id: "marketingstudio",
     name: "marketing-studio.ai",
-    accent: "#0F6B5C",
-    accentInk: "#ffffff",
+    accent: "#17bfcf",
+    accentInk: "#0f1726",
     ctaHeadline: "Sie möchten von KI-Suchen Anfragen bekommen?",
     ctaText:
       "Wir machen aus diesem Prüfbericht einen Umsetzungsplan: Inhalte, die Kundenfragen beantworten, saubere Markendaten und messbare Sichtbarkeit in ChatGPT & Co.",
