@@ -49,7 +49,7 @@ export default async function Page({
   searchParams: Promise<{ t?: string | string[] }>;
 }) {
   const { aktion } = await params;
-  if (!(aktion in TEXTE)) notFound();
+  if (!Object.hasOwn(TEXTE, aktion)) notFound();
   const a = aktion as Aktion;
   const sp = await searchParams;
   const t = typeof sp.t === "string" ? sp.t : null;

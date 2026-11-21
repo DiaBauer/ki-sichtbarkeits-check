@@ -2,7 +2,7 @@
 // The answer never reveals whether the address is already known.
 import { rpc } from "@/lib/db";
 import { umgebung } from "@/lib/server-key";
-import { herkunftAusRequest } from "@/lib/herkunft";
+import { herkunftAusRequest, basisUrl } from "@/lib/herkunft";
 import { erlaubt, ipSubjekt } from "@/lib/ratelimit";
 import { CONSENT_VERSION, TEXTE } from "@/lib/consent";
 import { istZweckEinwilligung, leseJson, neuerToken, pruefeEmail, sha256Hex } from "@/lib/tokens";
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
   if (!mailKonfiguriert()) return json({ status: "mail_fehlt" });
 
   const umg = umgebung();
-  const basis = new URL(req.url).origin;
+  const basis = basisUrl(req);
   const doiToken = neuerToken();
   const verwToken = neuerToken();
   const verwHash = sha256Hex(verwToken);

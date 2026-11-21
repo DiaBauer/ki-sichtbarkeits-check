@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     const r = await rpc<{ zweck: string; email: string }[]>("geo_abmelden", { p_verw_hash: sha256Hex(t) });
     const zeile = Array.isArray(r) ? r[0] : null;
     if (!zeile) {
-      return json({ ok: false, error: "Der Link ist ungültig oder wurde durch einen neueren Link ersetzt. Bitte nutzen Sie den Link aus Ihrer neuesten E-Mail oder fordern Sie unter „Meine Daten“ einen neuen Link an." });
+      return json({ ok: false, error: "Der Link ist ungültig oder abgelaufen. Bitte fordern Sie unter „Meine Daten“ einen neuen Link an." });
     }
     await newsletterKontaktAbmelden(zeile.email);
     return json({ ok: true });

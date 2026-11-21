@@ -4,7 +4,7 @@
 import { unseal } from "@/lib/gate";
 import { rpc } from "@/lib/db";
 import { umgebung } from "@/lib/server-key";
-import { herkunftAusRequest } from "@/lib/herkunft";
+import { herkunftAusRequest, basisUrl } from "@/lib/herkunft";
 import { erlaubt, ipSubjekt } from "@/lib/ratelimit";
 import { CONSENT_VERSION, TEXTE } from "@/lib/consent";
 import type { ReportData } from "@/lib/report-types";
@@ -61,8 +61,15 @@ export async function POST(req: Request) {
 
   const herkunft = herkunftAusRequest(req);
   const umg = umgebung();
-  const basis = new URL(req.url).origin;
+  const basis = basisUrl(req);
   const mailAn = mailKonfiguriert();
+
+  // Per recipient: at most 3 report mails per day, so the form cannot be used to flood a third party.
+  // The report itself is still shown on the page.
+  const proEmailOk = await erlaubt("lead_mail", sha256Hex("mail|" + email), 3, 24 * 60 * 60);
+  if (!proEmailOk) {
+    return Response.json({ gated: bericht, bericht: { link: "", mailVersandt: false } }, { headers: { "Cache-Control": "no-store" } });
+  }
 
   // 1. Store the report under a fresh report token.
   const berichtToken = neuerToken();
@@ -139,7 +146,8 @@ export async function POST(req: Request) {
         }),
       );
       if (!zeile) return "mail_fehlt";
-      if (zeile.status === "bestaetigt") return "bestaetigt";
+      // Neutral answer: do not reveal whether the address had already confirmed.
+      if (zeile.status === "bestaetigt") return "ausstehend";
       if (!zeile.doi_noetig) return "ausstehend"; // confirmation mail was sent less than 10 minutes ago
       const m = doiMail({ zweck, bestaetigenLink: `${basis}/e/bestaetigen?t=${doiToken}`, abmeldeLink, loeschLink });
       const r = await sendeMail({ an: email, ...m, abmeldeUrl: abmeldeApi });

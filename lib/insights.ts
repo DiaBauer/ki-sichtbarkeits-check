@@ -14,25 +14,25 @@ const KAT = ["lesbarkeit", "inhalt", "technik", "antworten", "schema", "marke"] 
 
 export const insightSchema = z.object({
   unternehmen: z.object({
-    name: z.string(),
-    branche: z.string().describe("Branche in 2–4 Wörtern"),
-    angebot: z.string().describe("Was das Unternehmen anbietet, ein Satz"),
-    region: z.string().nullable().describe("Region/Stadt, nur wenn im Text genannt"),
+    name: z.string().max(120),
+    branche: z.string().max(1500).describe("Branche in 2–4 Wörtern"),
+    angebot: z.string().max(1500).describe("Was das Unternehmen anbietet, ein Satz"),
+    region: z.string().max(80).nullable().describe("Region/Stadt, nur wenn im Text genannt"),
   }),
-  kurzbefund: z.string().describe("Zwei Sätze: was die Prüfung zeigt und was das größte Hindernis ist. Keine Aussage darüber, ob KI-Systeme die Firma tatsächlich nennen."),
+  kurzbefund: z.string().max(1500).describe("Zwei Sätze: was die Prüfung zeigt und was das größte Hindernis ist. Keine Aussage darüber, ob KI-Systeme die Firma tatsächlich nennen."),
   inhaltScore: z.number().int().min(0).max(100),
-  inhaltBegruendung: z.string().describe("Ein Satz mit Bezug auf konkrete Beobachtungen"),
+  inhaltBegruendung: z.string().max(1500).describe("Ein Satz mit Bezug auf konkrete Beobachtungen"),
   antwortScore: z.number().int().min(0).max(100),
-  antwortBegruendung: z.string().describe("Ein Satz mit Bezug auf konkrete Beobachtungen"),
+  antwortBegruendung: z.string().max(1500).describe("Ein Satz mit Bezug auf konkrete Beobachtungen"),
   schemaAbgleich: z.object({
     ergebnis: z.enum(["stimmig", "abweichungen", "nicht_beurteilbar"]),
-    detail: z.string().describe("Ein Satz: passen die strukturierten Daten zum sichtbaren Inhalt?"),
+    detail: z.string().max(1500).describe("Ein Satz: passen die strukturierten Daten zum sichtbaren Inhalt?"),
   }),
   zielgruppen: z
     .array(
       z.object({
-        name: z.string().describe("Kurzer Name der Zielgruppe"),
-        beschreibung: z.string().describe("Ein Satz: wer sie sind und was sie suchen"),
+        name: z.string().max(1500).describe("Kurzer Name der Zielgruppe"),
+        beschreibung: z.string().max(1500).describe("Ein Satz: wer sie sind und was sie suchen"),
       }),
     )
     .min(2)
@@ -40,26 +40,26 @@ export const insightSchema = z.object({
   fragen: z
     .array(
       z.object({
-        frage: z.string().describe("Frage, wie ein Interessent sie einer KI stellt, ohne Firmennamen"),
+        frage: z.string().max(1500).describe("Frage, wie ein Interessent sie einer KI stellt, ohne Firmennamen"),
         phase: z.enum(["problem", "loesung", "anbieter"]),
       }),
     )
     .min(10)
     .max(14),
-  suchbegriffe: z.array(z.string()).min(8).max(12),
+  suchbegriffe: z.array(z.string().max(80)).min(8).max(12),
   massnahmen: z
     .array(
       z.object({
-        titel: z.string().describe("Konkrete Maßnahme als Handlungsanweisung, max. 9 Wörter"),
-        befund: z.string().describe("Die konkrete Beobachtung auf dieser Website, auf die sich die Maßnahme bezieht"),
-        wie: z.string().describe("Ein bis zwei Sätze: was konkret zu tun ist"),
+        titel: z.string().max(1500).describe("Konkrete Maßnahme als Handlungsanweisung, max. 9 Wörter"),
+        befund: z.string().max(1500).describe("Die konkrete Beobachtung auf dieser Website, auf die sich die Maßnahme bezieht"),
+        wie: z.string().max(1500).describe("Ein bis zwei Sätze: was konkret zu tun ist"),
         kategorie: z.enum(KAT),
         aufwand: z.enum(["gering", "mittel", "hoch"]),
       }),
     )
     .min(5)
     .max(7),
-  schemaVorschlag: z.string().describe("JSON-LD (Organization bzw. passender Typ + WebSite) nur mit Angaben, die auf der Seite sichtbar sind; Unbekanntes als [Platzhalter]. Nur das JSON."),
+  schemaVorschlag: z.string().max(8000).describe("JSON-LD (Organization bzw. passender Typ + WebSite) nur mit Angaben, die auf der Seite sichtbar sind; Unbekanntes als [Platzhalter]. Nur das JSON."),
 });
 
 export type Insights = z.infer<typeof insightSchema>;

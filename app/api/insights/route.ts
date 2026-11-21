@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { after } from "next/server";
 import { seal, unseal } from "@/lib/gate";
 import { baueBericht, generateInsights, hatKiSchluessel, MODEL_ID, testInsights, type Insights } from "@/lib/insights";
 import type { ScanResult } from "@/lib/scan";
@@ -77,7 +78,8 @@ export async function POST(req: Request) {
         const r = await generateInsights(scan);
         insights = r.insights;
         console.log(JSON.stringify({ evt: "insights", model: MODEL_ID, ms: Date.now() - started, in: r.usage.inputTokens, out: r.usage.outputTokens }));
-        rpc("geo_cache_schreiben", { p_schluessel: cacheKey, p_daten: insights }).catch(() => {});
+        const zuCachen = insights;
+        after(() => rpc("geo_cache_schreiben", { p_schluessel: cacheKey, p_daten: zuCachen }).catch(() => {}));
       } catch (e) {
         console.error("insights failed", (e as Error).message);
         return Response.json({ error: "Die KI-Auswertung ist fehlgeschlagen. Bitte versuchen Sie es in einer Minute erneut." }, { status: 502 });

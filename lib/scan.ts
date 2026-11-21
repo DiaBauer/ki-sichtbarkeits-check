@@ -129,7 +129,8 @@ function collectJsonLd(root: HTMLElement) {
     const sa = it["sameAs"];
     (Array.isArray(sa) ? sa : sa ? [sa] : []).forEach((x) => typeof x === "string" && sameAs.add(x));
   }
-  return { blocks, count: items.length, invalid, types: [...types], sameAs: [...sameAs], raw: items.slice(0, 8) };
+  const k = (x: string) => x.slice(0, 80);
+  return { blocks, count: items.length, invalid, types: [...types].slice(0, 30).map(k), sameAs: [...sameAs].slice(0, 30).map((x) => x.slice(0, 300)), raw: items.slice(0, 8) };
 }
 
 const PROFILE_HOSTS: Record<string, string> = {
@@ -151,18 +152,21 @@ function profileOf(href: string) {
 }
 
 async function wikipedia(name: string): Promise<boolean | null> {
-  if (!name || name.length < 3) return null;
+  if (!name || name.length < 4) return null;
   let anyAnswer = false;
   for (const lang of ["de", "en"]) {
     const r = await safeFetch(
       `https://${lang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent('"' + name + '"')}&srlimit=3&format=json&srprop=`,
       { timeoutMs: 5000, maxBytes: 200_000, accept: "application/json" },
     );
+    if (!r.ok) continue;
     try {
       const j = JSON.parse(r.body);
+      if (!j?.query) continue;
       anyAnswer = true;
       const hits: { title: string }[] = j?.query?.search || [];
-      if (hits.some((h) => h.title.toLowerCase().includes(name.toLowerCase()))) return true;
+      const n = name.toLowerCase();
+      if (hits.some((h) => { const t = h.title.toLowerCase().replace(/\s*\(.*\)$/, ""); return t === n || t.startsWith(n + " "); })) return true;
     } catch {}
   }
   return anyAnswer ? false : null;
@@ -220,15 +224,16 @@ export async function scanSite(targetUrl: string) {
   const wordCount = bodyText ? bodyText.split(" ").length : 0;
   const scripts = root.querySelectorAll("script").length;
   const spaShell = wordCount < 120 && !!(root.querySelector("#root") || root.querySelector("#__next") || root.querySelector("#app") || scripts > 3);
-  const title = root.querySelector("title")?.text.trim() || "";
-  const metaDesc = root.querySelector('meta[name="description"]')?.getAttribute("content")?.trim() || "";
+  const kurz = (t: string, n: number) => (t.length > n ? t.slice(0, n) + "…" : t);
+  const title = kurz(root.querySelector("title")?.text.trim() || "", 200);
+  const metaDesc = kurz(root.querySelector('meta[name="description"]')?.getAttribute("content")?.trim() || "", 400);
   const robotsMeta = (root.querySelector('meta[name="robots"]')?.getAttribute("content") || "").toLowerCase();
   const xRobots = (page.headers.get("x-robots-tag") || "").toLowerCase();
   const lang = root.querySelector("html")?.getAttribute("lang") || "";
   const canonical = root.querySelector('link[rel="canonical"]')?.getAttribute("href") || "";
   const viewport = !!root.querySelector('meta[name="viewport"]');
   const h1s = root.querySelectorAll("h1").map((h) => h.text.trim()).filter(Boolean);
-  const headings = root.querySelectorAll("h1,h2,h3").map((h) => h.text.trim().replace(/\s+/g, " ")).filter(Boolean).slice(0, 60);
+  const headings = root.querySelectorAll("h1,h2,h3").map((h) => kurz(h.text.trim().replace(/\s+/g, " "), 200)).filter(Boolean).slice(0, 60);
   const questionHeadings = headings.filter((h) => h.endsWith("?"));
 
   const anchors = root.querySelectorAll("a[href]").map((a) => ({ href: a.getAttribute("href") || "", text: a.text.trim().toLowerCase() }));
@@ -418,7 +423,8 @@ export async function scanSite(targetUrl: string) {
     ...new Set(
       anchors
         .map((a) => abs(a.href))
-        .filter((u) => u.startsWith(origin) && !/#|\.(pdf|jpg|jpeg|png|gif|webp|zip|svg)$/i.test(u) && u !== finalUrl.toString() && !/(impressum|datenschutz|privacy|agb|cookie|legal|login|warenkorb|cart)/i.test(u)),
+        .filter((u) => { try { return new URL(u).origin === origin; } catch { return false; } })
+        .filter((u) => !/#|\.(pdf|jpg|jpeg|png|gif|webp|zip|svg)$/i.test(u) && u !== finalUrl.toString() && !/(impressum|datenschutz|privacy|agb|cookie|legal|login|warenkorb|cart)/i.test(u)),
     ),
   ];
   const prefer = /(leistung|angebot|service|ueber|über|about|produkt|loesung|lösung|team)/i;

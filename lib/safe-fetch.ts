@@ -63,8 +63,9 @@ export function istGesperrteAdresse(ip: string): boolean {
   const v4 = (a: number, b: number) => `${a >> 8}.${a & 255}.${b >> 8}.${b & 255}`;
   // IPv4-mapped ::ffff:a.b.c.d and IPv4-compatible ::a.b.c.d
   if (g.slice(0, 5).every((x) => x === 0) && (g[5] === 0xffff || g[5] === 0)) return blockV4.check(v4(g[6], g[7]), "ipv4");
-  // NAT64 64:ff9b::/96
+  // NAT64 64:ff9b::/96 and local-use NAT64 64:ff9b:1::/48
   if (g[0] === 0x64 && g[1] === 0xff9b && g.slice(2, 6).every((x) => x === 0)) return blockV4.check(v4(g[6], g[7]), "ipv4");
+  if (g[0] === 0x64 && g[1] === 0xff9b && g[2] === 1) return true;
   // 6to4 2002:AABB:CCDD::/16
   if (g[0] === 0x2002) return blockV4.check(v4(g[1], g[2]), "ipv4");
   return false;

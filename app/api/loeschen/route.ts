@@ -1,3 +1,4 @@
+import { basisUrl } from "@/lib/herkunft";
 // Deletion: POST { t } deletes all contacts and reports of the address (in this environment).
 // POST { email } requests a deletion link by mail; the answer is always the same.
 import { rpc } from "@/lib/db";
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
       }
       const n = Number(await rpc<number>("geo_loeschen", { p_verw_hash: hash })) || 0;
       if (n === 0) {
-        return json({ ok: false, geloescht: 0, error: "Der Link ist ungültig, wurde bereits verwendet oder durch einen neueren Link ersetzt. Sie können unter „Meine Daten“ einen neuen Löschlink anfordern." });
+        return json({ ok: false, geloescht: 0, error: "Der Link ist ungültig oder wurde bereits verwendet. Sie können unter „Meine Daten“ einen neuen Löschlink anfordern." });
       }
       if (email) await newsletterKontaktLoeschen(email);
       return json({ ok: true, geloescht: n });
@@ -56,7 +57,7 @@ export async function POST(req: Request) {
   try {
     const gesetzt = (await rpc<boolean>("geo_verwaltungs_token_erneuern", { p_email: email, p_umgebung: umgebung(), p_verw_hash: sha256Hex(token) })) === true;
     if (gesetzt) {
-      const basis = new URL(req.url).origin;
+      const basis = basisUrl(req);
       await sendeMail({ an: email, ...loeschMail({ loeschLink: `${basis}/e/loeschen?t=${token}` }) });
     }
   } catch (e) {
