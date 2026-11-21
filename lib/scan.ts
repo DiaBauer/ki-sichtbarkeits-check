@@ -349,13 +349,18 @@ export async function scanSite(targetUrl: string) {
   const orgOk = hasType("Organization", "Corporation", "LocalBusiness", "ProfessionalService", "OnlineBusiness", "Store", "Restaurant", "MedicalBusiness", "LegalService");
   const microdata = !!root.querySelector("[itemscope]");
   const angebotOk = hasType("Service", "Product", "Offer", "SoftwareApplication", "Course", "Event");
-  add({
-    id: "org", kategorie: "schema", label: "Angaben zum Unternehmen", gewicht: 40, erreicht: orgOk ? 1 : microdata ? 0.5 : 0,
-    status: orgOk ? "ok" : "fail",
-    detail: orgOk ? `Gefunden: ${ld.types.slice(0, 6).join(", ")}.` : ld.count ? `Nur ${ld.types.slice(0, 5).join(", ")} gefunden, keine Angaben zur Organisation.` : "Keine strukturierten Daten (JSON-LD) im ausgelieferten HTML.",
-  });
-  add({ id: "angebot", kategorie: "schema", label: "Angaben zu Leistungen oder Produkten", gewicht: 25, erreicht: angebotOk ? 1 : 0, status: angebotOk ? "ok" : "warn", detail: angebotOk ? "Vorhanden." : "Keine strukturierten Angaben zu Leistungen oder Produkten." });
-  add({ id: "website", kategorie: "schema", label: "Website-Angaben", gewicht: 10, erreicht: hasType("WebSite") ? 1 : 0, status: hasType("WebSite") ? "ok" : "warn", detail: hasType("WebSite") ? "Vorhanden." : "Kein WebSite-Eintrag." });
+  // Bei reinen JavaScript-Seiten ohne JSON-LD im HTML kann das Markup erst im Browser entstehen: nicht prüfbar statt Fehler.
+  const schemaUnklar = spaShell && !ld.blocks;
+  const sd = (id: string, label: string, gewicht: number, ok: boolean, teil: number, okText: string, failText: string, failStatus: Status) =>
+    add(
+      schemaUnklar
+        ? { id, kategorie: "schema", label, gewicht, erreicht: null, status: "unknown", detail: "Im ausgelieferten HTML stehen keine strukturierten Daten; sie könnten erst per JavaScript entstehen. Nicht geprüft." }
+        : { id, kategorie: "schema", label, gewicht, erreicht: ok ? 1 : teil, status: ok ? "ok" : failStatus, detail: ok ? okText : failText },
+    );
+  sd("org", "Angaben zum Unternehmen", 40, orgOk, microdata ? 0.5 : 0, `Gefunden: ${ld.types.slice(0, 6).join(", ")}.`,
+    ld.count ? `Nur ${ld.types.slice(0, 5).join(", ")} gefunden, keine Angaben zur Organisation.` : "Keine strukturierten Daten (JSON-LD) im ausgelieferten HTML.", "fail");
+  sd("angebot", "Angaben zu Leistungen oder Produkten", 25, angebotOk, 0, "Vorhanden.", "Keine strukturierten Angaben zu Leistungen oder Produkten.", "warn");
+  sd("website", "Website-Angaben", 10, hasType("WebSite"), 0, "Vorhanden.", "Kein WebSite-Eintrag.", "warn");
   add({
     id: "valide", kategorie: "schema", label: "JSON-LD fehlerfrei lesbar", gewicht: 25, erreicht: ld.blocks ? (ld.invalid ? 0 : 1) : null,
     status: ld.blocks ? (ld.invalid ? "fail" : "ok") : "unknown",
@@ -381,7 +386,11 @@ export async function scanSite(targetUrl: string) {
     status: markeUnklar ? "unknown" : reviewProfiles.length ? "ok" : "warn",
     detail: reviewProfiles.length ? `Verlinkt: ${reviewProfiles.join(", ")}.` : "Auf der Startseite ist kein Bewertungsprofil verlinkt. Ob Bewertungen existieren, wurde nicht geprüft.",
   });
-  add({ id: "sameas", kategorie: "marke", label: "Profile in strukturierten Daten (sameAs)", gewicht: 20, erreicht: ld.sameAs.length >= 2 ? 1 : ld.sameAs.length ? 0.5 : 0, status: ld.sameAs.length >= 2 ? "ok" : ld.sameAs.length ? "warn" : "fail", detail: ld.sameAs.length ? `${ld.sameAs.length} Profile verknüpft.` : "Keine Profile per sameAs verknüpft." });
+  add(
+    schemaUnklar
+      ? { id: "sameas", kategorie: "marke", label: "Profile in strukturierten Daten (sameAs)", gewicht: 20, erreicht: null, status: "unknown", detail: "Ohne strukturierte Daten im ausgelieferten HTML nicht prüfbar." }
+      : { id: "sameas", kategorie: "marke", label: "Profile in strukturierten Daten (sameAs)", gewicht: 20, erreicht: ld.sameAs.length >= 2 ? 1 : ld.sameAs.length ? 0.5 : 0, status: ld.sameAs.length >= 2 ? "ok" : ld.sameAs.length ? "warn" : "fail", detail: ld.sameAs.length ? `${ld.sameAs.length} Profile verknüpft.` : "Keine Profile per sameAs verknüpft." },
+  );
   add({
     id: "wikipedia", kategorie: "marke", label: "Wikipedia", gewicht: 0, erreicht: null, status: wiki === null ? "unknown" : "info",
     detail: wiki === null ? "Nicht abrufbar." : wiki ? `Zu „${brand}“ gibt es einen Wikipedia-Treffer.` : `Kein Wikipedia-Eintrag zu „${brand}“ gefunden. Für die meisten Unternehmen ist das normal und kein Mangel.`,
