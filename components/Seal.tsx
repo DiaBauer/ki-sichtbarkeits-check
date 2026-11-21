@@ -1,14 +1,14 @@
 import type { CategoryKey } from "@/lib/categories";
-import { CATEGORY_META } from "@/lib/categories";
+import { CATEGORY_META, CATEGORY_ORDER as ORDER } from "@/lib/categories";
 import type { Tone } from "@/lib/score";
 
-const ORDER: CategoryKey[] = ["citability", "brand", "content", "technical", "schema", "answer"];
-const COLORS: Record<Tone | "pending", string> = {
+const COLORS: Record<Tone | "pending" | "unknown", string> = {
   ok: "var(--ok)",
   mid: "var(--mid)",
   warn: "var(--warn)",
   fail: "var(--fail)",
   pending: "var(--line)",
+  unknown: "#b8c2cc",
 };
 
 // Round inspection seal: the six ring segments are the six test categories,
@@ -21,7 +21,7 @@ export default function Seal({
 }: {
   note: number | null;
   score: number | null;
-  segments: Partial<Record<CategoryKey, Tone>>;
+  segments: Partial<Record<CategoryKey, Tone | "unknown">>;
   host: string;
 }) {
   const r = 86;

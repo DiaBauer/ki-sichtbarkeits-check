@@ -2,8 +2,8 @@ import { Bot, CheckCircle2, XCircle } from "lucide-react";
 
 // Static preview of a report: shows visitors what they will get.
 const BARS = [
-  { label: "KI-Zitierfähigkeit", v: 74, tone: "ok" },
-  { label: "Markenautorität", v: 38, tone: "fail" },
+  { label: "KI-Lesbarkeit", v: 74, tone: "ok" },
+  { label: "Markenbelege", v: 38, tone: "fail" },
   { label: "Inhalt & Vertrauen", v: 61, tone: "mid" },
   { label: "Strukturierte Daten", v: 46, tone: "warn" },
 ];
