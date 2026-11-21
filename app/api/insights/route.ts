@@ -3,6 +3,7 @@ import { generateInsights, MODEL } from "@/lib/insights";
 import type { ScanResult } from "@/lib/scan";
 import { clientIp, limited } from "@/lib/ratelimit";
 
+export const preferredRegion = "fra1";
 export const maxDuration = 120;
 
 export async function POST(req: Request) {

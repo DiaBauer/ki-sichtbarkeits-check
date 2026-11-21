@@ -2,6 +2,7 @@ import { normalizeUrl, scanSite } from "@/lib/scan";
 import { seal } from "@/lib/gate";
 import { clientIp, limited } from "@/lib/ratelimit";
 
+export const preferredRegion = "fra1";
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
