@@ -1,6 +1,8 @@
 import { unseal } from "@/lib/gate";
 import { clientIp, limited } from "@/lib/ratelimit";
 
+export const preferredRegion = "fra1";
+
 type Gated = { gated: unknown; url: string; brand: string };
 
 async function storeLead(lead: Record<string, unknown>) {
