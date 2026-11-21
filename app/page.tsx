@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { brandFor } from "@/lib/brand";
 import Checker from "@/components/Checker";
+import { NextSteps, Newsletter, Pricing } from "@/components/Sections";
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ brand?: string; url?: string }> }) {
   const sp = await searchParams;
@@ -12,12 +13,18 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ b
           <a className="wordmark" href={brand.ctaUrl.replace(/#.*/, "")}>
             {brand.name}
           </a>
-          <a className="topbar-link" href={brand.ctaUrl}>
-            Kontakt
-          </a>
+          <nav className="topnav">
+            <a href="#preise">Preise</a>
+            <a className="topbar-link" href={brand.ctaUrl}>
+              Kontakt
+            </a>
+          </nav>
         </div>
       </header>
       <Checker brand={brand} initialUrl={sp.url || ""} />
+      <NextSteps />
+      <Pricing brand={brand} />
+      <Newsletter brand={brand} />
       <footer className="footer">
         <div className="wrap footer-inner">
           <p>

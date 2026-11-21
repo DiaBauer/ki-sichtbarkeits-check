@@ -45,10 +45,12 @@ create table public.geo_leads (
   created_at timestamptz not null default now(),
   name text,
   email text not null,
-  checked_url text not null,
+  checked_url text,
   brand_detected text,
   score int,
   site text,
+  source text,            -- 'report' (Bericht freigeschaltet) oder 'newsletter'
+  newsletter boolean not null default false,
   consent_at timestamptz not null
 );
 alter table public.geo_leads enable row level security;

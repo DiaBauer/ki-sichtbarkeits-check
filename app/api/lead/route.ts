@@ -1,28 +1,10 @@
 import { unseal } from "@/lib/gate";
 import { clientIp, limited } from "@/lib/ratelimit";
+import { storeLead } from "@/lib/leads";
 
 export const preferredRegion = "fra1";
 
 type Gated = { gated: unknown; url: string; brand: string };
-
-async function storeLead(lead: Record<string, unknown>) {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) {
-    // No database configured yet: keep the lead in the runtime log so it is not lost.
-    console.log(JSON.stringify({ evt: "lead", ...lead }));
-    return;
-  }
-  const res = await fetch(`${url}/rest/v1/geo_leads`, {
-    method: "POST",
-    headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json", Prefer: "return=minimal" },
-    body: JSON.stringify(lead),
-  });
-  if (!res.ok) {
-    console.error("lead insert failed", res.status, await res.text());
-    console.log(JSON.stringify({ evt: "lead", ...lead }));
-  }
-}
 
 export async function POST(req: Request) {
   if (limited("lead:" + clientIp(req), 10, 60 * 60 * 1000)) {
@@ -32,6 +14,7 @@ export async function POST(req: Request) {
     name?: string;
     email?: string;
     consent?: boolean;
+    newsletter?: boolean;
     gatedToken?: string;
     score?: number;
     site?: string;
@@ -58,6 +41,8 @@ export async function POST(req: Request) {
     score: typeof body.score === "number" ? body.score : null,
     site: (body.site || "").slice(0, 40),
     consent_at: new Date().toISOString(),
+    newsletter: !!body.newsletter,
+    source: "report",
   });
 
   return Response.json({ gated: data.gated });

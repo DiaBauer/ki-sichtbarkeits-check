@@ -5,6 +5,8 @@ import type { Brand } from "@/lib/brand";
 import { CATEGORY_META, CategoryKey, Finding, Status } from "@/lib/categories";
 import { grade, tone, totalScore } from "@/lib/score";
 import Seal from "./Seal";
+import HeroVisual from "./HeroVisual";
+import { ChecksOverview } from "./Sections";
 import type { Tone } from "@/lib/score";
 import {
   AlertTriangle, BadgeCheck, Bot, CalendarCheck, Check, CheckCircle2, Code2, Copy, FileSearch, Hash, ListChecks,
@@ -137,8 +139,9 @@ export default function Checker({ brand, initialUrl }: { brand: Brand; initialUr
 
   return (
     <main>
-      <div className="hero-band">
-      <section className="hero wrap">
+      <div className="hero-band" id="check">
+      <section className="hero wrap hero-grid">
+        <div className="hero-copy">
         <h1>Versteht KI, was Ihr Unternehmen anbietet?</h1>
         <p className="lede">
           Immer mehr Kunden fragen ChatGPT, Perplexity oder Google, statt selbst zu suchen. Dieser Check prüft, ob Ihre
@@ -169,6 +172,8 @@ export default function Checker({ brand, initialUrl }: { brand: Brand; initialUr
           <li><Check size={16} aria-hidden="true" /> Ergebnis in etwa einer Minute</li>
         </ul>
         {error && phase === "error" && <p className="error" role="alert">{error}</p>}
+        </div>
+        <HeroVisual />
       </section>
       </div>
 
@@ -306,32 +311,7 @@ export default function Checker({ brand, initialUrl }: { brand: Brand; initialUr
         </div>
       )}
 
-      {phase === "idle" && (
-        <section className="wrap explain">
-          <h2>Was geprüft wird</h2>
-          <dl>
-            <div>
-              <span className="explain-icon" aria-hidden="true"><Bot size={22} /></span>
-              <dt>Ob KI Ihre Seite lesen darf und kann</dt>
-              <dd>Sperren in der robots.txt, Seiten, die nur mit JavaScript funktionieren, fehlende Sitemap oder llms.txt.</dd>
-            </div>
-            <div>
-              <span className="explain-icon" aria-hidden="true"><BadgeCheck size={22} /></span>
-              <dt>Ob KI versteht, wer Sie sind</dt>
-              <dd>Strukturierte Daten zu Ihrem Unternehmen, verknüpfte Profile, Einträge auf Wikipedia und Bewertungsportalen.</dd>
-            </div>
-            <div>
-              <span className="explain-icon" aria-hidden="true"><Quote size={22} /></span>
-              <dt>Ob Ihre Texte zitierfähig sind</dt>
-              <dd>Klare Antworten auf Kundenfragen, belegte Aussagen, Zahlen, erkennbare Expertise.</dd>
-            </div>
-          </dl>
-          <p className="method">
-            Bewertet wird in sechs Bereichen, gewichtet nach ihrem Einfluss auf Zitate in KI-Antworten. Das Ergebnis ist eine
-            Schulnote von 1 bis 6 und eine Liste konkreter Maßnahmen.
-          </p>
-        </section>
-      )}
+      {phase === "idle" && <ChecksOverview />}
     </main>
   );
 }
@@ -369,6 +349,7 @@ function LeadGate({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [consent, setConsent] = useState(false);
+  const [newsletter, setNewsletter] = useState(false);
   const [sending, setSending] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -377,7 +358,7 @@ function LeadGate({
     setSending(true);
     setErr(null);
     try {
-      const r = await post<{ gated: Gated }>("/api/lead", { name, email, consent, gatedToken, score, site: brand.id });
+      const r = await post<{ gated: Gated }>("/api/lead", { name, email, consent, newsletter, gatedToken, score, site: brand.id });
       onUnlock(r.gated);
     } catch (e) {
       setErr((e as Error).message);
@@ -415,6 +396,10 @@ function LeadGate({
             Ich bin einverstanden, dass {brand.name} mich zu meinem Prüfbericht und passenden Angeboten per E-Mail kontaktiert.
             Die Einwilligung kann ich jederzeit widerrufen. Details in der <a href={brand.privacyUrl}>Datenschutzerklärung</a>.
           </span>
+        </label>
+        <label className="consent">
+          <input type="checkbox" checked={newsletter} onChange={(e) => setNewsletter(e.target.checked)} />
+          <span>Optional: Ich möchte zusätzlich das monatliche Update zur KI-Sichtbarkeit erhalten. Abmeldung jederzeit möglich.</span>
         </label>
         {err && <p className="error" role="alert">{err}</p>}
         <button type="submit" className="btn-primary" disabled={sending}>
