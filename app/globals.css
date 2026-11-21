@@ -216,6 +216,11 @@ code { font-size: 0.88em; background: var(--surface-2); padding: 0.12em 0.38em; 
 .findings li.fail { background: #fff3f2; }
 .findings li.warn { background: #fff7ef; }
 .findings li.ok { background: #effaf5; }
+.findings li.unknown { background: #f2f4f7; }
+.findings li.info { background: var(--surface-2); }
+.findings li.unknown .mark, .findings li.info .mark { color: var(--slate); }
+.consent-info { grid-column: 1 / -1; font-size: 0.86rem; color: var(--slate); margin: 0; }
+.consent-info a { color: var(--cyan); }
 .mark { margin-top: 2px; }
 .ok .mark { color: var(--ok-text); }
 .warn .mark { color: var(--warn-text); }

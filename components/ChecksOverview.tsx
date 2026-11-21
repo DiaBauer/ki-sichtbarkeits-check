@@ -6,47 +6,46 @@ type Area = { icon: LucideIcon; name: string; weight: number; checks: string[] }
 
 const AREAS: Area[] = [
   {
-    icon: Quote,
-    name: "KI-Zitierfähigkeit",
+    icon: Bot,
+    name: "KI-Lesbarkeit",
     weight: 25,
     checks: [
-      "Zugriff für 11 KI-Crawler, darunter GPTBot, ClaudeBot, PerplexityBot",
-      "Versteckte Sperren durch Cloudflare",
-      "llms.txt und llms-full.txt",
-      "Jeder Textabschnitt auf Zitierbarkeit bewertet",
-    ],
-  },
-  {
-    icon: BadgeCheck,
-    name: "Markenautorität",
-    weight: 20,
-    checks: [
-      "Eintrag auf Wikipedia (deutsch und englisch)",
-      "Profile auf LinkedIn, YouTube, XING",
-      "Bewertungsportale wie ProvenExpert, Trustpilot",
-      "Verknüpfte Profile in den strukturierten Daten",
+      "Zugriff für Google, Bing und die Such-Crawler von ChatGPT, Perplexity, Claude",
+      "Inhalt ohne JavaScript lesbar",
+      "Textabschnitte auf Zitierfähigkeit bewertet",
+      "Hinweise zu Trainings-Crawlern und Cloudflare-Regeln",
     ],
   },
   {
     icon: ShieldCheck,
     name: "Inhalt & Vertrauen",
-    weight: 20,
+    weight: 25,
     checks: [
       "Erfahrung: Projekte, Fallbeispiele, Zahlen",
       "Expertise: benannte Personen mit Qualifikation",
       "Belege statt Werbeversprechen",
-      "Impressum, Kontakt, Datenschutz",
+      "Impressum, Kontakt, Datenschutz verlinkt",
     ],
   },
   {
-    icon: Bot,
-    name: "Technik",
+    icon: Quote,
+    name: "Technische Grundlagen",
     weight: 15,
     checks: [
-      "Lesbarkeit ohne JavaScript",
-      "Sitemap, robots.txt, Indexierung",
-      "HTTPS und fünf Sicherheits-Header",
-      "Ladezeit, Mobilfähigkeit, Canonical",
+      "Indexierbarkeit, Seitentitel und Beschreibung",
+      "Sitemap und robots.txt",
+      "HTTPS und mobile Darstellung",
+      "Hinweise zu Antwortzeit und Sicherheits-Headern",
+    ],
+  },
+  {
+    icon: MessageCircleQuestion,
+    name: "Antwort-Struktur",
+    weight: 15,
+    checks: [
+      "Überschriften als Kundenfragen",
+      "Direkte Antworten und Definitionen",
+      "Ablauf, Dauer und Preisrahmen genannt",
     ],
   },
   {
@@ -54,21 +53,19 @@ const AREAS: Area[] = [
     name: "Strukturierte Daten",
     weight: 10,
     checks: [
-      "Organisation bzw. lokales Unternehmen",
-      "Leistungen, Produkte, Personen",
-      "FAQ, Breadcrumbs, Website-Angaben",
-      "Gültigkeit des JSON-LD",
+      "Angaben zu Unternehmen und Leistungen",
+      "Technisch fehlerfreies JSON-LD",
+      "Abgleich mit dem sichtbaren Inhalt",
     ],
   },
   {
-    icon: MessageCircleQuestion,
-    name: "Antwort-Struktur",
+    icon: BadgeCheck,
+    name: "Markenbelege",
     weight: 10,
     checks: [
-      "Überschriften als Kundenfragen",
-      "Direkte Antworten, Definitionen",
-      "Preise, Ablauf und Dauer genannt",
-      "Eignung für ChatGPT, Perplexity, Google AI Overviews",
+      "Verlinkte Profile wie LinkedIn, YouTube, XING",
+      "Verlinkte Bewertungsprofile",
+      "Verknüpfte Profile in den strukturierten Daten",
     ],
   },
 ];
@@ -79,9 +76,9 @@ export function ChecksOverview() {
       <div className="section-head">
         <h2>Was geprüft wird</h2>
         <p>
-          Über 25 Einzelprüfungen in sechs Bereichen, gewichtet nach ihrem Einfluss darauf, ob KI-Systeme Ihre Website
-          zitieren. Die technische Prüfung läuft automatisch, Inhalte und Zielgruppen bewertet Claude, ein KI-Modell von
-          Anthropic.
+          Rund 25 Prüfpunkte in sechs Bereichen zu den technischen und inhaltlichen Voraussetzungen, damit Suchmaschinen
+          und KI-Assistenten Ihre Website verstehen und als Quelle nutzen können. Die technische Prüfung läuft automatisch,
+          Inhalte bewertet Claude, ein KI-Modell von Anthropic. Ob KI-Systeme Sie tatsächlich nennen, misst der Check nicht.
         </p>
       </div>
       <dl className="stats">
@@ -91,15 +88,15 @@ export function ChecksOverview() {
         </div>
         <div>
           <dt>Einzelprüfungen</dt>
-          <dd>25+</dd>
+          <dd>~25</dd>
         </div>
         <div>
-          <dt>KI-Crawler geprüft</dt>
-          <dd>11</dd>
+          <dt>Such- und KI-Crawler geprüft</dt>
+          <dd>12</dd>
         </div>
         <div>
           <dt>Kundenfragen im Bericht</dt>
-          <dd>bis 15</dd>
+          <dd>bis 14</dd>
         </div>
       </dl>
       <ul className="areas">

@@ -11,7 +11,7 @@ export type ReportData = {
   note: number | null; // 1–6
   vorlaeufig: boolean; // true if less than 80 % of the weight could be checked
   kategorien: { key: CategoryKey; label: string; gewicht: number; punkte: number | null; begruendung: string }[];
-  befunde: { id: string; label: string; status: BefundStatus; detail: string }[];
+  befunde: { id: string; label: string; status: BefundStatus; detail: string; kategorie?: CategoryKey }[];
   unternehmen: { name: string; branche: string; angebot: string; region: string | null };
   kurzbefund: string;
   massnahmen: { titel: string; befund: string; wie: string; kategorie: CategoryKey; aufwand: string }[];
