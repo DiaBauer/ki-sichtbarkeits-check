@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.107",
     "@fontsource/ibm-plex-sans": "^5.2.5",
     "@fontsource/ibm-plex-sans-condensed": "^5.2.5",
     "ai": "^7.0.179",

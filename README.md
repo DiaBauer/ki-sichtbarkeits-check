@@ -27,13 +27,13 @@ Die Prüfmethode basiert auf [geo-seo-claude](https://github.com/zubair-trabzada
 
 ## Einrichtung auf Vercel
 
-1. Repository in Vercel importieren (Framework: Next.js, Region: fra1).
+1. Repository in Vercel importieren (Framework: Next.js; Region fra1 steht in vercel.json).
 2. Umgebungsvariablen setzen:
    - `GATE_SECRET`: beliebige lange Zufallszeichenkette (Pflicht)
    - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`: für die Lead-Speicherung (optional;
      ohne sie landen Leads im Vercel-Log als `{"evt":"lead",...}`)
-3. AI Gateway: läuft auf Vercel ohne eigenen API-Key (OIDC). Im Team muss AI Gateway
-   aktiviert sein bzw. Guthaben vorhanden sein.
+3. KI: `ANTHROPIC_API_KEY` setzen (direkte Abrechnung bei Anthropic, Modell
+   claude-sonnet-5-5). Ohne Key wird das Vercel AI Gateway verwendet.
 4. Domains verbinden, z. B. `check.agenticweb.studio` und `check.marketing-studio.ai`.
    Zum Testen der zweiten Marke ohne Domain: `?brand=marketingstudio`.
 

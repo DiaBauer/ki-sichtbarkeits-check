@@ -1,8 +1,13 @@
 import { generateText, Output } from "ai";
+import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
 import type { ScanResult } from "./scan";
 
-export const MODEL = "anthropic/claude-sonnet-5.5";
+// Direct Anthropic API (key in ANTHROPIC_API_KEY). Falls back to the
+// Vercel AI Gateway when no key is set.
+export const MODEL_ID = "claude-sonnet-5-5";
+export const MODEL = process.env.ANTHROPIC_API_KEY ? `anthropic:${MODEL_ID}` : `gateway:anthropic/claude-sonnet-5.5`;
+const model = () => (process.env.ANTHROPIC_API_KEY ? anthropic(MODEL_ID) : "anthropic/claude-sonnet-5.5");
 
 export const insightSchema = z.object({
   unternehmen: z.object({
@@ -80,7 +85,7 @@ export async function generateInsights(scan: Extract<ScanResult, { ok: true }>) 
   ].join("\n\n");
 
   const { output, usage } = await generateText({
-    model: MODEL,
+    model: model(),
     output: Output.object({ schema: insightSchema }),
     system: `Du bist GEO-Analyst (Generative Engine Optimization) für den deutschsprachigen Markt. Du bewertest, wie gut eine Website von KI-Suchsystemen (ChatGPT, Perplexity, Google AI Overviews, Claude, Gemini) verstanden, zitiert und empfohlen werden kann.
 
