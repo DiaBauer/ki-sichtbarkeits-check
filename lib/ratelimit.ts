@@ -1,19 +1,21 @@
-// Simple per-instance limiter. Good enough to stop casual abuse in the MVP;
-// replace with a shared store (e.g. Upstash/Supabase) before heavy traffic.
-const hits = new Map<string, number[]>();
+import { createHash } from "node:crypto";
+import { rpc } from "./db";
 
-export function limited(key: string, max: number, windowMs: number) {
-  const now = Date.now();
-  const list = (hits.get(key) || []).filter((t) => now - t < windowMs);
-  if (list.length >= max) {
-    hits.set(key, list);
-    return true;
-  }
-  list.push(now);
-  hits.set(key, list);
-  return false;
+// Shared rate limit in the database (works across all server instances).
+// The client IP is only stored as a salted hash.
+export function clientIp(req: Request) {
+  return (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "unbekannt";
 }
 
-export function clientIp(req: Request) {
-  return (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "unknown";
+export function ipSubjekt(req: Request) {
+  return createHash("sha256").update((process.env.GATE_SECRET || "") + "|" + clientIp(req)).digest("hex").slice(0, 32);
+}
+
+/** true = allowed. Fails closed for AI-cost buckets, open for cheap buckets. */
+export async function erlaubt(bucket: string, subjekt: string, max: number, fensterS: number, failClosed = false) {
+  try {
+    return await rpc<boolean>("geo_rl", { p_bucket: bucket, p_subjekt: subjekt, p_max: max, p_fenster_s: fensterS });
+  } catch {
+    return !failClosed;
+  }
 }

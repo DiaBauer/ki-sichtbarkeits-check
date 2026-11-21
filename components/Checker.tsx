@@ -6,7 +6,7 @@ import { CATEGORY_META, CategoryKey, Finding, Status } from "@/lib/categories";
 import { grade, tone, totalScore } from "@/lib/score";
 import Seal from "./Seal";
 import HeroVisual from "./HeroVisual";
-import { ChecksOverview } from "./Sections";
+import { ChecksOverview } from "./ChecksOverview";
 import type { Tone } from "@/lib/score";
 import {
   AlertTriangle, BadgeCheck, Bot, CalendarCheck, Check, CheckCircle2, Code2, Copy, FileSearch, Hash, ListChecks,
