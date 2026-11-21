@@ -414,7 +414,7 @@ function LeadGate({
         </p>
         <label className="consent">
           <input type="checkbox" checked={kit} onChange={(e) => setKit(e.target.checked)} />
-          <span>Optional: {TEXTE.kit}</span>
+          <span><strong>Selbst umsetzen?</strong> Das SEO- & GEO-KI-Selbstoptimierungs-Kit ist in Vorbereitung. Optional: {TEXTE.kit}</span>
         </label>
         <label className="consent">
           <input type="checkbox" checked={newsletter} onChange={(e) => setNewsletter(e.target.checked)} />
